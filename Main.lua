@@ -479,11 +479,11 @@ end
 
 -- Multi-select state for gear, eggs, and seeds
 local selectedGear = {}
-local selectedEggs = {}
-local selectedSeeds = {}
+local selectedEggs = {} -- dictionary: [option]=true
+local selectedSeeds = {} -- dictionary: [option]=true
 
 -- Helper to clear and repopulate a dropdown list with multi-select (generic)
-local function populateMultiDropdown(listFrame, options, selected)
+local function populateMultiDropdown(listFrame, options, selected, details)
     for _, child in ipairs(listFrame:GetChildren()) do
         if child:IsA("TextButton") then
             child:Destroy()
@@ -502,10 +502,23 @@ local function populateMultiDropdown(listFrame, options, selected)
         btn.Parent = listFrame
         btn.ZIndex = 24
         btn.MouseButton1Click:Connect(function()
-            selected[option] = not selected[option]
-            btn.BackgroundColor3 = selected[option] and Color3.fromRGB(60, 180, 90) or Color3.fromRGB(80, 120, 200)
-            btn.Text = (selected[option] and "✔ " or "") .. option
+            if selected[option] then
+                selected[option] = nil
+            else
+                selected[option] = true
+            end
+            populateMultiDropdown(listFrame, options, selected, details)
         end)
+        if details and details[option] then
+            btn.MouseEnter:Connect(function()
+                btn.Text = (selected[option] and "✔ " or "") .. option .. "\n" .. details[option]
+                btn.TextWrapped = true
+            end)
+            btn.MouseLeave:Connect(function()
+                btn.Text = (selected[option] and "✔ " or "") .. option
+                btn.TextWrapped = false
+            end)
+        end
     end
     listFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 38)
 end
