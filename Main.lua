@@ -484,80 +484,6 @@ local function populateMultiDropdown(listFrame, options, selected)
     listFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 38)
 end
 
--- Helper to set dropdown height and move elements below
-local function setDropdownHeight(listFrame, options)
-    local maxVisible = 6 -- max visible options before scrolling
-    local optionHeight = 36
-    local spacing = 2
-    local count = #options
-    local showCount = math.min(count, maxVisible)
-    local height = showCount * (optionHeight + spacing)
-    listFrame.Size = UDim2.new(1, -40, 0, listFrame.Visible and height or 0)
-    listFrame.CanvasSize = UDim2.new(0, 0, 0, count * (optionHeight + spacing))
-end
-
--- Update dropdown open/close logic to move elements below
-local function updateShopDropdownPositions()
-    local y = 20
-    -- Gear
-    gearHeader.Position = UDim2.new(0, 20, 0, y)
-    y = y + 32 + 6
-    gearDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44 + 6
-    gearDropdownList.Position = UDim2.new(0, 20, 0, y)
-    y = y + gearDropdownList.Size.Y.Offset + 6
-    autoBuyGearToggle.Position = UDim2.new(0, 20, 0, y)
-    y = y + 36 + 12
-    -- Egg
-    eggHeader.Position = UDim2.new(0, 20, 0, y)
-    y = y + 32 + 6
-    eggDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44 + 6
-    eggDropdownList.Position = UDim2.new(0, 20, 0, y)
-    y = y + eggDropdownList.Size.Y.Offset + 6
-    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, y)
-    y = y + 36 + 12
-    -- Seed
-    seedHeader.Position = UDim2.new(0, 20, 0, y)
-    y = y + 32 + 6
-    seedDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44 + 6
-    seedDropdownList.Position = UDim2.new(0, 20, 0, y)
-    y = y + seedDropdownList.Size.Y.Offset + 6
-    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, y)
-    y = y + 36 + 12
-    shopScroll.CanvasSize = UDim2.new(0, 0, 0, y + 20)
-end
-
--- Patch dropdown button events to use new height/position logic
-if gearDropdownBtn and gearDropdownList then
-    gearDropdownBtn.MouseButton1Click:Connect(function()
-        local open = not gearDropdownList.Visible
-        closeAllDropdowns(open and "Gear" or nil)
-        gearDropdownList.Visible = open
-        setDropdownHeight(gearDropdownList, gearOptions)
-        updateShopDropdownPositions()
-    end)
-end
-if eggDropdownBtn and eggDropdownList then
-    eggDropdownBtn.MouseButton1Click:Connect(function()
-        local open = not eggDropdownList.Visible
-        closeAllDropdowns(open and "Egg" or nil)
-        eggDropdownList.Visible = open
-        setDropdownHeight(eggDropdownList, eggOptions)
-        updateShopDropdownPositions()
-    end)
-end
-if seedDropdownBtn and seedDropdownList then
-    seedDropdownBtn.MouseButton1Click:Connect(function()
-        local open = not seedDropdownList.Visible
-        closeAllDropdowns(open and "Seed" or nil)
-        seedDropdownList.Visible = open
-        setDropdownHeight(seedDropdownList, seedOptions)
-        updateShopDropdownPositions()
-    end)
-end
-
 -- Dropdown open/close logic for all three dropdowns
 local function openDropdown(dropdownList, options, selected, setHeight, moveBelow)
     local open = not dropdownList.Visible
@@ -610,10 +536,7 @@ local function closeAllDropdowns(except)
     if except ~= "Egg" and eggDropdownList then eggDropdownList.Visible = false end
     if except ~= "Seed" and seedDropdownList then seedDropdownList.Visible = false end
     openDropdownName = except
-    setDropdownHeight(gearDropdownList, gearOptions)
-    setDropdownHeight(eggDropdownList, eggOptions)
-    setDropdownHeight(seedDropdownList, seedOptions)
-    updateShopDropdownPositions()
+    if updateShopTogglePositions then updateShopTogglePositions() end
 end
 
 -- Patch dropdown button events (only one connection each, remove duplicates)
