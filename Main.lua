@@ -273,7 +273,12 @@ y = y + 36 + 12
 
 -- GEAR DROPDOWN BUTTON EVENT
 gearDropdownBtn.MouseButton1Click:Connect(function()
-    openDropdown(gearDropdownList, gearOptions, selectedGear, setDropdownHeight, repositionAllShopUI, gearDetails)
+    gearDropdownList.Visible = not gearDropdownList.Visible
+    if gearDropdownList.Visible then
+        eggDropdownList.Visible = false
+        seedDropdownList.Visible = false
+    end
+    updateShopTogglePositions()
 end)
 
 -- EGG SECTION
@@ -333,7 +338,12 @@ y = y + 36 + 12
 
 -- EGG DROPDOWN BUTTON EVENT
 eggDropdownBtn.MouseButton1Click:Connect(function()
-    openDropdown(eggDropdownList, eggOptions, selectedEggs, setDropdownHeight, repositionAllShopUI)
+    eggDropdownList.Visible = not eggDropdownList.Visible
+    if eggDropdownList.Visible then
+        gearDropdownList.Visible = false
+        seedDropdownList.Visible = false
+    end
+    updateShopTogglePositions()
 end)
 
 -- SEED SECTION
@@ -525,7 +535,6 @@ function updateShopTogglePositions()
     local contentBottom = shopFrame.AbsolutePosition.Y + shopFrame.AbsoluteSize.Y
     -- Egg Dropdown Button
     eggDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44
     -- Egg Dropdown List
     if eggDropdownList.Visible then
         local dropdownTop = shopFrame.AbsolutePosition.Y + y
@@ -542,7 +551,6 @@ function updateShopTogglePositions()
     end
     -- Seed Dropdown Button
     seedDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44
     -- Seed Dropdown List
     if seedDropdownList.Visible then
         local dropdownTop = shopFrame.AbsolutePosition.Y + y
