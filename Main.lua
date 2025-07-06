@@ -195,8 +195,22 @@ autoSubmitToggle.MouseButton1Click:Connect(function()
     updateAutoSubmitToggle()
 end)
 
+-- Sidebar and tab buttons always on top
+sidebar.ZIndex = 100
+for i, name in ipairs(tabNames) do
+    local tabBtn = tabButtons[name]
+    if tabBtn then
+        tabBtn.ZIndex = 101
+    end
+end
+contentFrame.ZIndex = 20
+for _, frame in pairs(tabContent) do
+    frame.ZIndex = 21
+end
+
 -- SHOP TAB CONTENT (Refactored to match working reference dropdown pattern)
 local shopFrame = tabContent["SHOP"]
+shopFrame.ZIndex = 22
 
 -- Egg Dropdown Button
 local eggDropdownBtn = Instance.new("TextButton")
@@ -211,7 +225,7 @@ eggDropdownBtn.TextColor3 = Color3.fromRGB(255,255,255)
 eggDropdownBtn.BorderSizePixel = 0
 eggDropdownBtn.TextXAlignment = Enum.TextXAlignment.Center
 eggDropdownBtn.Parent = shopFrame
-eggDropdownBtn.ZIndex = 2
+eggDropdownBtn.ZIndex = 23
 
 -- Egg Dropdown ScrollingFrame
 local eggDropdownList = Instance.new("ScrollingFrame")
@@ -222,7 +236,7 @@ eggDropdownList.BackgroundColor3 = Color3.fromRGB(60, 120, 180)
 eggDropdownList.BorderSizePixel = 0
 eggDropdownList.Visible = false
 eggDropdownList.Parent = shopFrame
-eggDropdownList.ZIndex = 3
+eggDropdownList.ZIndex = 24
 eggDropdownList.ClipsDescendants = true
 eggDropdownList.CanvasSize = UDim2.new(0, 0, 0, 0)
 eggDropdownList.ScrollBarThickness = 10
@@ -269,7 +283,7 @@ for i, name in ipairs(eggOptions) do
     opt.TextColor3 = Color3.fromRGB(255,255,255)
     opt.BorderSizePixel = 0
     opt.Parent = eggDropdownList
-    opt.ZIndex = 4
+    opt.ZIndex = 25
     -- Tooltip for details
     opt.MouseEnter:Connect(function()
         opt.Text = name .. "\n" .. (eggDetails[name] or "")
@@ -305,7 +319,7 @@ seedDropdownBtn.TextColor3 = Color3.fromRGB(255,255,255)
 seedDropdownBtn.BorderSizePixel = 0
 seedDropdownBtn.TextXAlignment = Enum.TextXAlignment.Center
 seedDropdownBtn.Parent = shopFrame
-seedDropdownBtn.ZIndex = 2
+seedDropdownBtn.ZIndex = 23
 
 -- Seed Dropdown ScrollingFrame
 local seedDropdownList = Instance.new("ScrollingFrame")
@@ -316,7 +330,7 @@ seedDropdownList.BackgroundColor3 = Color3.fromRGB(60, 120, 180)
 seedDropdownList.BorderSizePixel = 0
 seedDropdownList.Visible = false
 seedDropdownList.Parent = shopFrame
-seedDropdownList.ZIndex = 3
+seedDropdownList.ZIndex = 24
 seedDropdownList.ClipsDescendants = true
 seedDropdownList.CanvasSize = UDim2.new(0, 0, 0, 0)
 seedDropdownList.ScrollBarThickness = 10
@@ -364,7 +378,7 @@ for i, name in ipairs(seedOptions) do
     opt.TextColor3 = Color3.fromRGB(255,255,255)
     opt.BorderSizePixel = 0
     opt.Parent = seedDropdownList
-    opt.ZIndex = 4
+    opt.ZIndex = 25
     -- Tooltip for details
     opt.MouseEnter:Connect(function()
         opt.Text = name .. "\n" .. (seedDetails[name] or "")
@@ -545,15 +559,14 @@ for _, frame in pairs(tabContent) do
 end
 
 -- Ensure sidebar and tab buttons are always on top
-sidebar.ZIndex = 20
+sidebar.ZIndex = 100
 for i, name in ipairs(tabNames) do
     local tabBtn = tabButtons[name]
     if tabBtn then
-        tabBtn.ZIndex = 20
+        tabBtn.ZIndex = 101
     end
 end
--- Ensure content frame and tab content are above sidebar
-contentFrame.ZIndex = 21
+contentFrame.ZIndex = 20
 for _, frame in pairs(tabContent) do
     frame.ZIndex = 21
 end
