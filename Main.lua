@@ -527,6 +527,54 @@ seedDropdownBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
+-- Dropdown state
+local openDropdownName = nil
+
+local function closeAllDropdowns(except)
+    if except ~= "Egg" then eggDropdownList.Visible = false end
+    if except ~= "Seed" then seedDropdownList.Visible = false end
+    openDropdownName = except
+    updateShopTogglePositions()
+end
+
+-- Update Egg Dropdown Button event
+if eggDropdownBtn then
+    eggDropdownBtn.MouseButton1Click:Connect(function()
+        local open = not eggDropdownList.Visible
+        closeAllDropdowns(open and "Egg" or nil)
+        eggDropdownList.Visible = open
+        updateShopTogglePositions()
+    end)
+end
+
+-- Update Seed Dropdown Button event
+if seedDropdownBtn then
+    seedDropdownBtn.MouseButton1Click:Connect(function()
+        local open = not seedDropdownList.Visible
+        closeAllDropdowns(open and "Seed" or nil)
+        seedDropdownList.Visible = open
+        updateShopTogglePositions()
+    end)
+end
+
+-- Hide dropdowns if clicking elsewhere (fix)
+UserInputService.InputBegan:Connect(function(input, processed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+        local target = mouse.Target
+        local guiService = game:GetService("GuiService")
+        local focused = guiService.SelectedObject
+        -- Only close if not clicking on dropdowns/buttons
+        if eggDropdownList.Visible and not eggDropdownBtn:IsAncestorOf(focused) and not eggDropdownList:IsAncestorOf(focused) then
+            eggDropdownList.Visible = false
+        end
+        if seedDropdownList.Visible and not seedDropdownBtn:IsAncestorOf(focused) and not seedDropdownList:IsAncestorOf(focused) then
+            seedDropdownList.Visible = false
+        end
+        updateShopTogglePositions()
+    end
+end)
+
 -- Get references to RemoteEvents
 local BuyGearStock = ReplicatedStorage.GameEvents:FindFirstChild("BuyGearStock")
 local BuyPetEgg = ReplicatedStorage.GameEvents:FindFirstChild("BuyPetEgg")
