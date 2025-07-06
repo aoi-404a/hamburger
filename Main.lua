@@ -533,8 +533,35 @@ end
 function updateShopTogglePositions()
     local y = 20
     local contentBottom = shopFrame.AbsolutePosition.Y + shopFrame.AbsoluteSize.Y
+    -- Gear Header
+    gearHeader.Position = UDim2.new(0, 20, 0, y)
+    y = y + 32 + 6
+    -- Gear Dropdown Button
+    gearDropdownBtn.Position = UDim2.new(0, 20, 0, y)
+    y = y + 44 + 6
+    -- Gear Dropdown List
+    if gearDropdownList.Visible then
+        local dropdownTop = shopFrame.AbsolutePosition.Y + y
+        local maxHeight = contentBottom - dropdownTop - 20
+        local needed = #gearOptions * 38
+        local showHeight = math.max(0, math.min(needed, maxHeight))
+        gearDropdownList.Position = UDim2.new(0, 20, 0, y)
+        gearDropdownList.Size = UDim2.new(1, -40, 0, showHeight)
+        gearDropdownList.CanvasSize = UDim2.new(0, 0, 0, needed)
+        y = y + showHeight
+    else
+        gearDropdownList.Position = UDim2.new(0, 20, 0, y)
+        gearDropdownList.Size = UDim2.new(1, -40, 0, 0)
+    end
+    -- Auto Buy Gear Toggle
+    autoBuyGearToggle.Position = UDim2.new(0, 20, 0, y)
+    y = y + 36 + 12
+    -- Egg Header
+    eggHeader.Position = UDim2.new(0, 20, 0, y)
+    y = y + 32 + 6
     -- Egg Dropdown Button
     eggDropdownBtn.Position = UDim2.new(0, 20, 0, y)
+    y = y + 44 + 6
     -- Egg Dropdown List
     if eggDropdownList.Visible then
         local dropdownTop = shopFrame.AbsolutePosition.Y + y
@@ -549,8 +576,15 @@ function updateShopTogglePositions()
         eggDropdownList.Position = UDim2.new(0, 20, 0, y)
         eggDropdownList.Size = UDim2.new(1, -40, 0, 0)
     end
+    -- Auto Buy Egg Toggle
+    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, y)
+    y = y + 36 + 12
+    -- Seed Header
+    seedHeader.Position = UDim2.new(0, 20, 0, y)
+    y = y + 32 + 6
     -- Seed Dropdown Button
     seedDropdownBtn.Position = UDim2.new(0, 20, 0, y)
+    y = y + 44 + 6
     -- Seed Dropdown List
     if seedDropdownList.Visible then
         local dropdownTop = shopFrame.AbsolutePosition.Y + y
@@ -565,9 +599,11 @@ function updateShopTogglePositions()
         seedDropdownList.Position = UDim2.new(0, 20, 0, y)
         seedDropdownList.Size = UDim2.new(1, -40, 0, 0)
     end
-    -- Toggles
-    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, y + 18)
-    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, y + 18 + 54)
+    -- Auto Buy Seed Toggle
+    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, y)
+    y = y + 36 + 12
+    -- Update CanvasSize for shopScroll
+    shopScroll.CanvasSize = UDim2.new(0, 0, 0, y + 20)
 end
 
 -- Helper to close all dropdowns
