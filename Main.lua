@@ -451,43 +451,10 @@ local function populateDropdownList(listFrame, options)
     listFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 38)
 end
 
--- Multi-select state for seeds
-local selectedSeeds = {}
-
--- Helper to clear and repopulate a dropdown list with multi-select
-local function populateSeedDropdown(listFrame, options, selected)
-    -- Remove old buttons
-    for _, child in ipairs(listFrame:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-    -- Add new buttons
-    for i, option in ipairs(options) do
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, 0, 0, 36)
-        btn.Position = UDim2.new(0, 0, 0, (i-1)*38)
-        btn.BackgroundColor3 = selected[option] and Color3.fromRGB(60, 180, 90) or Color3.fromRGB(80, 120, 200)
-        btn.Text = (selected[option] and "✔ " or "") .. option
-        btn.Font = Enum.Font.SourceSans
-        btn.TextSize = 20
-        btn.TextColor3 = Color3.fromRGB(255,255,255)
-        btn.BorderSizePixel = 0
-        btn.Parent = listFrame
-        btn.ZIndex = 24
-        btn.MouseButton1Click:Connect(function()
-            selected[option] = not selected[option]
-            btn.BackgroundColor3 = selected[option] and Color3.fromRGB(60, 180, 90) or Color3.fromRGB(80, 120, 200)
-            btn.Text = (selected[option] and "✔ " or "") .. option
-        end)
-    end
-    -- Set CanvasSize for scrolling
-    listFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 38)
-end
-
--- Multi-select state for gear and eggs
+-- Multi-select state for gear, eggs, and seeds
 local selectedGear = {}
 local selectedEggs = {}
+local selectedSeeds = {}
 
 -- Helper to clear and repopulate a dropdown list with multi-select (generic)
 local function populateMultiDropdown(listFrame, options, selected)
@@ -517,49 +484,47 @@ local function populateMultiDropdown(listFrame, options, selected)
     listFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 38)
 end
 
--- Patch gearDropdownBtn event for multi-select
+-- Dropdown open/close logic for all three dropdowns
+local function openDropdown(dropdownList, options, selected, setHeight, moveBelow)
+    local open = not dropdownList.Visible
+    closeAllDropdowns(open and dropdownList.Name or nil)
+    dropdownList.Visible = open
+    if open then
+        setHeight(dropdownList, options)
+        populateMultiDropdown(dropdownList, options, selected)
+    else
+        setHeight(dropdownList, options)
+    end
+    if moveBelow then moveBelow() end
+end
+
+-- Patch dropdown button events (only one connection each)
 gearDropdownBtn.MouseButton1Click:Connect(function()
-    local open = not gearDropdownList.Visible
-    closeAllDropdowns(open and "Gear" or nil)
-    gearDropdownList.Visible = open
-    dropdownStates.Gear = open
-    setDropdownHeight(gearDropdownList, gearOptions)
-    populateMultiDropdown(gearDropdownList, gearOptions, selectedGear)
-    autoBuyGearToggle.Position = UDim2.new(0, 20, 0, gearDropdownList.Position.Y.Offset + gearDropdownList.Size.Y.Offset + 6)
-    eggHeader.Position = UDim2.new(0, 20, 0, autoBuyGearToggle.Position.Y.Offset + autoBuyGearToggle.Size.Y.Offset + 12)
-    eggDropdownBtn.Position = UDim2.new(0, 20, 0, eggHeader.Position.Y.Offset + eggHeader.Size.Y.Offset + 6)
-    eggDropdownList.Position = UDim2.new(0, 20, 0, eggDropdownBtn.Position.Y.Offset + eggDropdownBtn.Size.Y.Offset + 6)
-    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, eggDropdownList.Position.Y.Offset + eggDropdownList.Size.Y.Offset + 6)
-    seedHeader.Position = UDim2.new(0, 20, 0, autoBuyEggToggle.Position.Y.Offset + autoBuyEggToggle.Size.Y.Offset + 12)
-    seedDropdownBtn.Position = UDim2.new(0, 20, 0, seedHeader.Position.Y.Offset + seedHeader.Size.Y.Offset + 6)
-    seedDropdownList.Position = UDim2.new(0, 20, 0, seedDropdownBtn.Position.Y.Offset + seedDropdownBtn.Size.Y.Offset + 6)
-    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    openDropdown(gearDropdownList, gearOptions, selectedGear, setDropdownHeight, function()
+        autoBuyGearToggle.Position = UDim2.new(0, 20, 0, gearDropdownList.Position.Y.Offset + gearDropdownList.Size.Y.Offset + 6)
+        eggHeader.Position = UDim2.new(0, 20, 0, autoBuyGearToggle.Position.Y.Offset + autoBuyGearToggle.Size.Y.Offset + 12)
+        eggDropdownBtn.Position = UDim2.new(0, 20, 0, eggHeader.Position.Y.Offset + eggHeader.Size.Y.Offset + 6)
+        eggDropdownList.Position = UDim2.new(0, 20, 0, eggDropdownBtn.Position.Y.Offset + eggDropdownBtn.Size.Y.Offset + 6)
+        autoBuyEggToggle.Position = UDim2.new(0, 20, 0, eggDropdownList.Position.Y.Offset + eggDropdownList.Size.Y.Offset + 6)
+        seedHeader.Position = UDim2.new(0, 20, 0, autoBuyEggToggle.Position.Y.Offset + autoBuyEggToggle.Size.Y.Offset + 12)
+        seedDropdownBtn.Position = UDim2.new(0, 20, 0, seedHeader.Position.Y.Offset + seedHeader.Size.Y.Offset + 6)
+        seedDropdownList.Position = UDim2.new(0, 20, 0, seedDropdownBtn.Position.Y.Offset + seedDropdownBtn.Size.Y.Offset + 6)
+        autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    end)
 end)
-
--- Patch eggDropdownBtn event for multi-select
 eggDropdownBtn.MouseButton1Click:Connect(function()
-    local open = not eggDropdownList.Visible
-    closeAllDropdowns(open and "Egg" or nil)
-    eggDropdownList.Visible = open
-    dropdownStates.Egg = open
-    setDropdownHeight(eggDropdownList, eggOptions)
-    populateMultiDropdown(eggDropdownList, eggOptions, selectedEggs)
-    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, eggDropdownList.Position.Y.Offset + eggDropdownList.Size.Y.Offset + 6)
-    seedHeader.Position = UDim2.new(0, 20, 0, autoBuyEggToggle.Position.Y.Offset + autoBuyEggToggle.Size.Y.Offset + 12)
-    seedDropdownBtn.Position = UDim2.new(0, 20, 0, seedHeader.Position.Y.Offset + seedHeader.Size.Y.Offset + 6)
-    seedDropdownList.Position = UDim2.new(0, 20, 0, seedDropdownBtn.Position.Y.Offset + seedDropdownBtn.Size.Y.Offset + 6)
-    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    openDropdown(eggDropdownList, eggOptions, selectedEggs, setDropdownHeight, function()
+        autoBuyEggToggle.Position = UDim2.new(0, 20, 0, eggDropdownList.Position.Y.Offset + eggDropdownList.Size.Y.Offset + 6)
+        seedHeader.Position = UDim2.new(0, 20, 0, autoBuyEggToggle.Position.Y.Offset + autoBuyEggToggle.Size.Y.Offset + 12)
+        seedDropdownBtn.Position = UDim2.new(0, 20, 0, seedHeader.Position.Y.Offset + seedHeader.Size.Y.Offset + 6)
+        seedDropdownList.Position = UDim2.new(0, 20, 0, seedDropdownBtn.Position.Y.Offset + seedDropdownBtn.Size.Y.Offset + 6)
+        autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    end)
 end)
-
--- Patch seedDropdownBtn event for multi-select (already present, but use generic)
 seedDropdownBtn.MouseButton1Click:Connect(function()
-    local open = not seedDropdownList.Visible
-    closeAllDropdowns(open and "Seed" or nil)
-    seedDropdownList.Visible = open
-    dropdownStates.Seed = open
-    setDropdownHeight(seedDropdownList, seedOptions)
-    populateMultiDropdown(seedDropdownList, seedOptions, selectedSeeds)
-    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    openDropdown(seedDropdownList, seedOptions, selectedSeeds, setDropdownHeight, function()
+        autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    end)
 end)
 
 -- Get references to RemoteEvents
