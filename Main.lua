@@ -527,51 +527,62 @@ seedDropdownBtn.MouseButton1Click:Connect(function()
     end)
 end)
 
+-- Remove duplicate dropdown logic and keep only one set of dropdown open/close logic
 -- Dropdown state
 local openDropdownName = nil
 
 local function closeAllDropdowns(except)
-    if except ~= "Egg" then eggDropdownList.Visible = false end
-    if except ~= "Seed" then seedDropdownList.Visible = false end
+    if except ~= "Gear" and gearDropdownList then gearDropdownList.Visible = false end
+    if except ~= "Egg" and eggDropdownList then eggDropdownList.Visible = false end
+    if except ~= "Seed" and seedDropdownList then seedDropdownList.Visible = false end
     openDropdownName = except
-    updateShopTogglePositions()
+    if updateShopTogglePositions then updateShopTogglePositions() end
 end
 
--- Update Egg Dropdown Button event
-if eggDropdownBtn then
+-- Patch dropdown button events (only one connection each, remove duplicates)
+if gearDropdownBtn and gearDropdownList then
+    gearDropdownBtn.MouseButton1Click:Connect(function()
+        local open = not gearDropdownList.Visible
+        closeAllDropdowns(open and "Gear" or nil)
+        gearDropdownList.Visible = open
+        if setDropdownHeight and gearOptions then setDropdownHeight(gearDropdownList, gearOptions) end
+        if updateShopTogglePositions then updateShopTogglePositions() end
+    end)
+end
+if eggDropdownBtn and eggDropdownList then
     eggDropdownBtn.MouseButton1Click:Connect(function()
         local open = not eggDropdownList.Visible
         closeAllDropdowns(open and "Egg" or nil)
         eggDropdownList.Visible = open
-        updateShopTogglePositions()
+        if setDropdownHeight and eggOptions then setDropdownHeight(eggDropdownList, eggOptions) end
+        if updateShopTogglePositions then updateShopTogglePositions() end
     end)
 end
-
--- Update Seed Dropdown Button event
-if seedDropdownBtn then
+if seedDropdownBtn and seedDropdownList then
     seedDropdownBtn.MouseButton1Click:Connect(function()
         local open = not seedDropdownList.Visible
         closeAllDropdowns(open and "Seed" or nil)
         seedDropdownList.Visible = open
-        updateShopTogglePositions()
+        if setDropdownHeight and seedOptions then setDropdownHeight(seedDropdownList, seedOptions) end
+        if updateShopTogglePositions then updateShopTogglePositions() end
     end)
 end
 
--- Hide dropdowns if clicking elsewhere (fix)
+-- Hide dropdowns if clicking elsewhere (fix, only one connection)
 UserInputService.InputBegan:Connect(function(input, processed)
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local mouse = game:GetService("Players").LocalPlayer:GetMouse()
-        local target = mouse.Target
         local guiService = game:GetService("GuiService")
         local focused = guiService.SelectedObject
-        -- Only close if not clicking on dropdowns/buttons
-        if eggDropdownList.Visible and not eggDropdownBtn:IsAncestorOf(focused) and not eggDropdownList:IsAncestorOf(focused) then
+        if gearDropdownList and gearDropdownList.Visible and not (gearDropdownBtn and gearDropdownBtn:IsAncestorOf(focused)) and not gearDropdownList:IsAncestorOf(focused) then
+            gearDropdownList.Visible = false
+        end
+        if eggDropdownList and eggDropdownList.Visible and not (eggDropdownBtn and eggDropdownBtn:IsAncestorOf(focused)) and not eggDropdownList:IsAncestorOf(focused) then
             eggDropdownList.Visible = false
         end
-        if seedDropdownList.Visible and not seedDropdownBtn:IsAncestorOf(focused) and not seedDropdownList:IsAncestorOf(focused) then
+        if seedDropdownList and seedDropdownList.Visible and not (seedDropdownBtn and seedDropdownBtn:IsAncestorOf(focused)) and not seedDropdownList:IsAncestorOf(focused) then
             seedDropdownList.Visible = false
         end
-        updateShopTogglePositions()
+        if updateShopTogglePositions then updateShopTogglePositions() end
     end
 end)
 
