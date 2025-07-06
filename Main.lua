@@ -522,69 +522,112 @@ local function setDropdownHeight(listFrame, options)
     listFrame.CanvasSize = UDim2.new(0, 0, 0, count * (optionHeight + spacing))
 end
 
--- Update dropdown open/close logic to move elements below
-local function updateShopDropdownPositions()
+-- Helper to update toggle positions based on dropdowns
+function updateShopTogglePositions()
     local y = 20
-    -- Gear
-    gearHeader.Position = UDim2.new(0, 20, 0, y)
-    y = y + 32 + 6
-    gearDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44 + 6
-    gearDropdownList.Position = UDim2.new(0, 20, 0, y)
-    y = y + gearDropdownList.Size.Y.Offset + 6
-    autoBuyGearToggle.Position = UDim2.new(0, 20, 0, y)
-    y = y + 36 + 12
-    -- Egg
-    eggHeader.Position = UDim2.new(0, 20, 0, y)
-    y = y + 32 + 6
+    local contentBottom = shopFrame.AbsolutePosition.Y + shopFrame.AbsoluteSize.Y
+    -- Egg Dropdown Button
     eggDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44 + 6
-    eggDropdownList.Position = UDim2.new(0, 20, 0, y)
-    y = y + eggDropdownList.Size.Y.Offset + 6
-    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, y)
-    y = y + 36 + 12
-    -- Seed
-    seedHeader.Position = UDim2.new(0, 20, 0, y)
-    y = y + 32 + 6
+    y = y + 44
+    -- Egg Dropdown List
+    if eggDropdownList.Visible then
+        local dropdownTop = shopFrame.AbsolutePosition.Y + y
+        local maxHeight = contentBottom - dropdownTop - 20
+        local needed = #eggOptions * 38
+        local showHeight = math.max(0, math.min(needed, maxHeight))
+        eggDropdownList.Position = UDim2.new(0, 20, 0, y)
+        eggDropdownList.Size = UDim2.new(1, -40, 0, showHeight)
+        eggDropdownList.CanvasSize = UDim2.new(0, 0, 0, needed)
+        y = y + showHeight
+    else
+        eggDropdownList.Position = UDim2.new(0, 20, 0, y)
+        eggDropdownList.Size = UDim2.new(1, -40, 0, 0)
+    end
+    -- Seed Dropdown Button
     seedDropdownBtn.Position = UDim2.new(0, 20, 0, y)
-    y = y + 44 + 6
-    seedDropdownList.Position = UDim2.new(0, 20, 0, y)
-    y = y + seedDropdownList.Size.Y.Offset + 6
-    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, y)
-    y = y + 36 + 12
-    shopScroll.CanvasSize = UDim2.new(0, 0, 0, y + 20)
+    y = y + 44
+    -- Seed Dropdown List
+    if seedDropdownList.Visible then
+        local dropdownTop = shopFrame.AbsolutePosition.Y + y
+        local maxHeight = contentBottom - dropdownTop - 20
+        local needed = #seedOptions * 38
+        local showHeight = math.max(0, math.min(needed, maxHeight))
+        seedDropdownList.Position = UDim2.new(0, 20, 0, y)
+        seedDropdownList.Size = UDim2.new(1, -40, 0, showHeight)
+        seedDropdownList.CanvasSize = UDim2.new(0, 0, 0, needed)
+        y = y + showHeight
+    else
+        seedDropdownList.Position = UDim2.new(0, 20, 0, y)
+        seedDropdownList.Size = UDim2.new(1, -40, 0, 0)
+    end
+    -- Toggles
+    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, y + 18)
+    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, y + 18 + 54)
 end
 
--- Remove all duplicate/conflicting dropdown button events (keep only openDropdown logic)
---[[]
-if gearDropdownBtn and gearDropdownList then
-    gearDropdownBtn.MouseButton1Click:Connect(function()
-        local open = not gearDropdownList.Visible
-        closeAllDropdowns(open and "Gear" or nil)
-        gearDropdownList.Visible = open
-        setDropdownHeight(gearDropdownList, gearOptions)
-        updateShopDropdownPositions()
-    end)
+-- Helper to close all dropdowns
+local function closeAllDropdowns(except)
+    if except ~= "EggDropdownList" then
+        eggDropdownList.Visible = false
+    end
+    if except ~= "SeedDropdownList" then
+        seedDropdownList.Visible = false
+    end
+    updateShopTogglePositions()
 end
-if eggDropdownBtn and eggDropdownList then
-    eggDropdownBtn.MouseButton1Click:Connect(function()
-        local open = not eggDropdownList.Visible
-        closeAllDropdowns(open and "Egg" or nil)
-        eggDropdownList.Visible = open
-        setDropdownHeight(eggDropdownList, eggOptions)
-        updateShopDropdownPositions()
-    end)
+
+-- Dropdown open/close logic (robust, minimal change)
+local function closeAllDropdowns()
+    local changed = false
+    if eggDropdownList.Visible then eggDropdownList.Visible = false changed = true end
+    if seedDropdownList.Visible then seedDropdownList.Visible = false changed = true end
+    if changed then updateShopTogglePositions() end
 end
-if seedDropdownBtn and seedDropdownList then
-    seedDropdownBtn.MouseButton1Click:Connect(function()
-        local open = not seedDropdownList.Visible
-        closeAllDropdowns(open and "Seed" or nil)
-        seedDropdownList.Visible = open
-        setDropdownHeight(seedDropdownList, seedOptions)
-        updateShopDropdownPositions()
-    end)
-end
-]]
+
+eggDropdownBtn.MouseButton1Click:Connect(function()
+    if not eggDropdownList.Visible then
+        closeAllDropdowns()
+        eggDropdownList.Visible = true
+    else
+        eggDropdownList.Visible = false
+    end
+    updateShopTogglePositions()
+end)
+
+seedDropdownBtn.MouseButton1Click:Connect(function()
+    if not seedDropdownList.Visible then
+        closeAllDropdowns()
+        seedDropdownList.Visible = true
+    else
+        seedDropdownList.Visible = false
+    end
+    updateShopTogglePositions()
+end)
+
+-- Hide dropdowns if clicking elsewhere
+UserInputService.InputBegan:Connect(function(input, processed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        local mouse = game:GetService("Players").LocalPlayer:GetMouse()
+        local mouseX, mouseY = mouse.X, mouse.Y
+        local function isInside(gui)
+            if not gui.Visible then return false end
+            local absPos = gui.AbsolutePosition
+            local absSize = gui.AbsoluteSize
+            return mouseX >= absPos.X and mouseX <= absPos.X + absSize.X and mouseY >= absPos.Y and mouseY <= absPos.Y + absSize.Y
+        end
+        local changed = false
+        -- Only close if click is outside both the button and the list
+        if eggDropdownList.Visible and not (isInside(eggDropdownBtn) or isInside(eggDropdownList)) then
+            eggDropdownList.Visible = false
+            changed = true
+        end
+        if seedDropdownList.Visible and not (isInside(seedDropdownBtn) or isInside(seedDropdownList)) then
+            seedDropdownList.Visible = false
+            changed = true
+        end
+        if changed then updateShopTogglePositions() end
+    end
+end)
 
 -- Remove unused helper functions and variables related to dropdowns
 
@@ -604,6 +647,7 @@ local gearOptions = {
     "Harvest Tool",
     "Friendship Pot"
 }
+
 local gearDetails = {
     ["Watering Can"] = "Speeds up Plant Growth, 10 uses. | 50,000 | Common",
     ["Trowel"] = "Moves Plants, five uses. | 100,000 | Uncommon",
@@ -728,7 +772,7 @@ end)
 seedDropdownBtn.MouseButton1Click:Connect(function()
     openDropdown(seedDropdownList, seedOptions, selectedSeeds, setDropdownHeight, function()
         autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
-    end, seedDetails)
+    end)
 end)
 
 -- Set all tab content children ZIndex to 22 (above contentFrame)
@@ -861,7 +905,7 @@ end)
 seedDropdownBtn.MouseButton1Click:Connect(function()
     openDropdown(seedDropdownList, seedOptions, selectedSeeds, setDropdownHeight, function()
         autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
-    end, seedDetails)
+    end)
 end)
 
 -- Set all tab content children ZIndex to 22 (above contentFrame)
@@ -994,7 +1038,27 @@ end)
 seedDropdownBtn.MouseButton1Click:Connect(function()
     openDropdown(seedDropdownList, seedOptions, selectedSeeds, setDropdownHeight, function()
         autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
-    end, seedDetails)
+    end)
+end)
+
+-- Dropdown open debounce to prevent immediate close
+local eggDropdownDebounce = false
+local seedDropdownDebounce = false
+
+eggDropdownBtn.MouseButton1Click:Connect(function()
+    if eggDropdownDebounce then return end
+    eggDropdownDebounce = true
+    eggDropdownList.Visible = not eggDropdownList.Visible
+    updateShopTogglePositions()
+    task.delay(0.15, function() eggDropdownDebounce = false end)
+end)
+
+seedDropdownBtn.MouseButton1Click:Connect(function()
+    if seedDropdownDebounce then return end
+    seedDropdownDebounce = true
+    seedDropdownList.Visible = not seedDropdownList.Visible
+    updateShopTogglePositions()
+    task.delay(0.15, function() seedDropdownDebounce = false end)
 end)
 
 -- Set all tab content children ZIndex to 22 (above contentFrame)
@@ -1127,7 +1191,7 @@ end)
 seedDropdownBtn.MouseButton1Click:Connect(function()
     openDropdown(seedDropdownList, seedOptions, selectedSeeds, setDropdownHeight, function()
         autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
-    end, seedDetails)
+    end)
 end)
 
 -- Set all tab content children ZIndex to 22 (above contentFrame)
@@ -1260,7 +1324,7 @@ end)
 seedDropdownBtn.MouseButton1Click:Connect(function()
     openDropdown(seedDropdownList, seedOptions, selectedSeeds, setDropdownHeight, function()
         autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
-    end, seedDetails)
+    end)
 end)
 
 -- Set all tab content children ZIndex to 22 (above contentFrame)
