@@ -347,17 +347,17 @@ y = y + 36 + 12
 
 -- EGG DROPDOWN BUTTON EVENT
 eggDropdownBtn.MouseButton1Click:Connect(function()
-    local open = not eggDropdownList.Visible
-    closeAllDropdowns(open and "Egg" or nil)
-    eggDropdownList.Visible = open
-    dropdownStates.Egg = open
-    setDropdownHeight(eggDropdownList, eggOptions)
-    -- Move elements below
-    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, eggDropdownList.Position.Y.Offset + eggDropdownList.Size.Y.Offset + 6)
-    seedHeader.Position = UDim2.new(0, 20, 0, autoBuyEggToggle.Position.Y.Offset + autoBuyEggToggle.Size.Y.Offset + 12)
-    seedDropdownBtn.Position = UDim2.new(0, 20, 0, seedHeader.Position.Y.Offset + seedHeader.Size.Y.Offset + 6)
-    seedDropdownList.Position = UDim2.new(0, 20, 0, seedDropdownBtn.Position.Y.Offset + seedDropdownBtn.Size.Y.Offset + 6)
-    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    eggDropdownList.Visible = not eggDropdownList.Visible
+    -- Set size when opening/closing
+    if eggDropdownList.Visible then
+        local maxVisible = 6
+        local needed = #eggOptions * 38
+        local showHeight = math.min(needed, maxVisible * 38)
+        eggDropdownList.Size = UDim2.new(1, -40, 0, showHeight)
+    else
+        eggDropdownList.Size = UDim2.new(1, -40, 0, 0)
+    end
+    updateShopTogglePositions()
 end)
 
 -- SEED SECTION
