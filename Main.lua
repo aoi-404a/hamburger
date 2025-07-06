@@ -420,9 +420,43 @@ shopScroll.CanvasSize = UDim2.new(0, 0, 0, y + 20)
 
 -- Update all dropdown logic to use the new parents and positions
 -- Dropdown options (example values, replace with your own)
-local gearOptions = {"Sword", "Shield", "Bow", "Staff"}
+local gearOptions = {
+    "Watering Can",
+    "Trowel",
+    "Recall Wrench",
+    "Basic Sprinkler",
+    "Advanced Sprinkler",
+    "Godly Sprinkler",
+    "Magnifying Glass",
+    "Tanning Mirror",
+    "Master Sprinkler",
+    "Cleaning Spray",
+    "Favourite Tool",
+    "Harvest Tool",
+    "Friendship Pot"
+}
 local eggOptions = {"Dinosaur Egg", "Dragon Egg", "Phoenix Egg"}
-local seedOptions = {"Wheat Seed", "Corn Seed", "Pumpkin Seed"}
+local seedOptions = {
+    "Carrot",
+    "Strawberry",
+    "Blueberry",
+    "Tomato",
+    "Cauliflower",
+    "Watermelon",
+    "Raffleisa",
+    "Green Apple",
+    "Avocado",
+    "Banana",
+    "Pineapple",
+    "Kiwi",
+    "Bell Pepper",
+    "Prickly Pear",
+    "Loquat",
+    "Feijoa",
+    "Pitcher Plant",
+    "Sugar Apple",
+    "Burning Bud"
+}
 
 -- Helper to clear and repopulate a dropdown list
 local function populateDropdownList(listFrame, options)
@@ -484,6 +518,80 @@ local function populateMultiDropdown(listFrame, options, selected)
     listFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 38)
 end
 
+-- Helper to set dropdown height and move elements below
+local function setDropdownHeight(listFrame, options)
+    local maxVisible = 6 -- max visible options before scrolling
+    local optionHeight = 36
+    local spacing = 2
+    local count = #options
+    local showCount = math.min(count, maxVisible)
+    local height = showCount * (optionHeight + spacing)
+    listFrame.Size = UDim2.new(1, -40, 0, listFrame.Visible and height or 0)
+    listFrame.CanvasSize = UDim2.new(0, 0, 0, count * (optionHeight + spacing))
+end
+
+-- Update dropdown open/close logic to move elements below
+local function updateShopDropdownPositions()
+    local y = 20
+    -- Gear
+    gearHeader.Position = UDim2.new(0, 20, 0, y)
+    y = y + 32 + 6
+    gearDropdownBtn.Position = UDim2.new(0, 20, 0, y)
+    y = y + 44 + 6
+    gearDropdownList.Position = UDim2.new(0, 20, 0, y)
+    y = y + gearDropdownList.Size.Y.Offset + 6
+    autoBuyGearToggle.Position = UDim2.new(0, 20, 0, y)
+    y = y + 36 + 12
+    -- Egg
+    eggHeader.Position = UDim2.new(0, 20, 0, y)
+    y = y + 32 + 6
+    eggDropdownBtn.Position = UDim2.new(0, 20, 0, y)
+    y = y + 44 + 6
+    eggDropdownList.Position = UDim2.new(0, 20, 0, y)
+    y = y + eggDropdownList.Size.Y.Offset + 6
+    autoBuyEggToggle.Position = UDim2.new(0, 20, 0, y)
+    y = y + 36 + 12
+    -- Seed
+    seedHeader.Position = UDim2.new(0, 20, 0, y)
+    y = y + 32 + 6
+    seedDropdownBtn.Position = UDim2.new(0, 20, 0, y)
+    y = y + 44 + 6
+    seedDropdownList.Position = UDim2.new(0, 20, 0, y)
+    y = y + seedDropdownList.Size.Y.Offset + 6
+    autoBuySeedToggle.Position = UDim2.new(0, 20, 0, y)
+    y = y + 36 + 12
+    shopScroll.CanvasSize = UDim2.new(0, 0, 0, y + 20)
+end
+
+-- Patch dropdown button events to use new height/position logic
+if gearDropdownBtn and gearDropdownList then
+    gearDropdownBtn.MouseButton1Click:Connect(function()
+        local open = not gearDropdownList.Visible
+        closeAllDropdowns(open and "Gear" or nil)
+        gearDropdownList.Visible = open
+        setDropdownHeight(gearDropdownList, gearOptions)
+        updateShopDropdownPositions()
+    end)
+end
+if eggDropdownBtn and eggDropdownList then
+    eggDropdownBtn.MouseButton1Click:Connect(function()
+        local open = not eggDropdownList.Visible
+        closeAllDropdowns(open and "Egg" or nil)
+        eggDropdownList.Visible = open
+        setDropdownHeight(eggDropdownList, eggOptions)
+        updateShopDropdownPositions()
+    end)
+end
+if seedDropdownBtn and seedDropdownList then
+    seedDropdownBtn.MouseButton1Click:Connect(function()
+        local open = not seedDropdownList.Visible
+        closeAllDropdowns(open and "Seed" or nil)
+        seedDropdownList.Visible = open
+        setDropdownHeight(seedDropdownList, seedOptions)
+        updateShopDropdownPositions()
+    end)
+end
+
 -- Dropdown open/close logic for all three dropdowns
 local function openDropdown(dropdownList, options, selected, setHeight, moveBelow)
     local open = not dropdownList.Visible
@@ -536,7 +644,10 @@ local function closeAllDropdowns(except)
     if except ~= "Egg" and eggDropdownList then eggDropdownList.Visible = false end
     if except ~= "Seed" and seedDropdownList then seedDropdownList.Visible = false end
     openDropdownName = except
-    if updateShopTogglePositions then updateShopTogglePositions() end
+    setDropdownHeight(gearDropdownList, gearOptions)
+    setDropdownHeight(eggDropdownList, eggOptions)
+    setDropdownHeight(seedDropdownList, seedOptions)
+    updateShopDropdownPositions()
 end
 
 -- Patch dropdown button events (only one connection each, remove duplicates)
@@ -708,4 +819,153 @@ updateFarmToggle()
 farmToggle.MouseButton1Click:Connect(function()
     autoFarmState = not autoFarmState
     updateFarmToggle()
+end)
+
+-- Gear options and details
+local gearOptions = {
+    "Watering Can",
+    "Trowel",
+    "Recall Wrench",
+    "Basic Sprinkler",
+    "Advanced Sprinkler",
+    "Godly Sprinkler",
+    "Magnifying Glass",
+    "Tanning Mirror",
+    "Master Sprinkler",
+    "Cleaning Spray",
+    "Favourite Tool",
+    "Harvest Tool",
+    "Friendship Pot"
+}
+local gearDetails = {
+    ["Watering Can"] = "Speeds up Plant Growth, 10 uses. | 50,000 | Common",
+    ["Trowel"] = "Moves Plants, five uses. | 100,000 | Uncommon",
+    ["Recall Wrench"] = "Teleports to Gear Shop, five uses. | 150,000 | Uncommon",
+    ["Basic Sprinkler"] = "Increases Growth Speed and Fruit Size, lasts five minutes. | 25,000 | Rare",
+    ["Advanced Sprinkler"] = "Increases Growth Speed and Mutation chances, lasts five minutes. | 50,000 | Legendary",
+    ["Godly Sprinkler"] = "Increases Growth Speed, Mutation chances and Fruit Size, lasts five minutes. | 120,000 | Mythical",
+    ["Magnifying Glass"] = "Inspect plants to reveal the value without collecting them. | 10,000,000 | Mythical",
+    ["Tanning Mirror"] = "Redirects Sun Beams 10 times before being destroyed. | 1,000,000 | Mythical",
+    ["Master Sprinkler"] = "Greatly increases Growth Speed, Mutation Chances and Fruit Size, lasts 10 minutes. | 10,000,000 | Divine",
+    ["Cleaning Spray"] = "Cleans mutations off fruit, 10 uses. | 15,000,000 | Divine",
+    ["Favourite Tool"] = "Favourites your fruit plants to prevent collecting, 20 uses. | 20,000,000 | Divine",
+    ["Harvest Tool"] = "Harvests all fruit from a chosen plant, 5 uses. | 30,000,000 | Divine",
+    ["Friendship Pot"] = "A flower pot to share with a friend! | 15,000,000 | Divine"
+}
+
+-- Seed options and details
+local seedOptions = {
+    "Carrot",
+    "Strawberry",
+    "Blueberry",
+    "Tomato",
+    "Cauliflower",
+    "Watermelon",
+    "Raffleisa",
+    "Green Apple",
+    "Avocado",
+    "Banana",
+    "Pineapple",
+    "Kiwi",
+    "Bell Pepper",
+    "Prickly Pear",
+    "Loquat",
+    "Feijoa",
+    "Pitcher Plant",
+    "Sugar Apple",
+    "Burning Bud"
+}
+local seedDetails = {
+    ["Carrot"] = "Single | 10 | Common",
+    ["Strawberry"] = "Multiple | 50 | Common",
+    ["Blueberry"] = "Multiple | 400 | Uncommon",
+    ["Tomato"] = "Multiple | 800 | Rare",
+    ["Cauliflower"] = "Multiple | 1,300 | Rare",
+    ["Watermelon"] = "Single | 2,500 | Legendary",
+    ["Raffleisa"] = "Single | 3,200 | Legendary",
+    ["Green Apple"] = "Multiple | 3,500 | Legendary",
+    ["Avocado"] = "Multiple | 5,000 | Legendary",
+    ["Banana"] = "Multiple | 7,000 | Legendary",
+    ["Pineapple"] = "Multiple | 7,500 | Mythical",
+    ["Kiwi"] = "Multiple | 10,000 | Mythical",
+    ["Bell Pepper"] = "Multiple | 55,000 | Mythical",
+    ["Prickly Pear"] = "Multiple | 555,000 | Mythical",
+    ["Loquat"] = "Multiple | 900,000 | Divine",
+    ["Feijoa"] = "Multiple | 900,000 | Divine",
+    ["Pitcher Plant"] = "Multiple | 7,500,000 | Divine",
+    ["Sugar Apple"] = "Multiple | 25,000,000 | Prismatic",
+    ["Burning Bud"] = "Multiple | 50,000,000 | Prismatic"
+}
+
+-- Update gear and seed dropdown population to show tooltips
+local function populateMultiDropdown(listFrame, options, selected, details)
+    for _, child in ipairs(listFrame:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    for i, option in ipairs(options) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, 0, 0, 36)
+        btn.Position = UDim2.new(0, 0, 0, (i-1)*38)
+        btn.BackgroundColor3 = selected[option] and Color3.fromRGB(60, 180, 90) or Color3.fromRGB(80, 120, 200)
+        btn.Text = (selected[option] and "✔ " or "") .. option
+        btn.Font = Enum.Font.SourceSans
+        btn.TextSize = 20
+        btn.TextColor3 = Color3.fromRGB(255,255,255)
+        btn.BorderSizePixel = 0
+        btn.Parent = listFrame
+        btn.ZIndex = 24
+        btn.MouseButton1Click:Connect(function()
+            selected[option] = not selected[option]
+            btn.BackgroundColor3 = selected[option] and Color3.fromRGB(60, 180, 90) or Color3.fromRGB(80, 120, 200)
+            btn.Text = (selected[option] and "✔ " or "") .. option
+        end)
+        if details and details[option] then
+            btn.MouseEnter:Connect(function()
+                btn.Text = (selected[option] and "✔ " or "") .. option .. "\n" .. details[option]
+                btn.TextWrapped = true
+            end)
+            btn.MouseLeave:Connect(function()
+                btn.Text = (selected[option] and "✔ " or "") .. option
+                btn.TextWrapped = false
+            end)
+        end
+    end
+    listFrame.CanvasSize = UDim2.new(0, 0, 0, #options * 38)
+end
+
+-- Patch dropdown openDropdown to use details for gear/seed
+local function openDropdown(dropdownList, options, selected, setHeight, moveBelow, details)
+    local open = not dropdownList.Visible
+    closeAllDropdowns(open and dropdownList.Name or nil)
+    dropdownList.Visible = open
+    if open then
+        setHeight(dropdownList, options)
+        populateMultiDropdown(dropdownList, options, selected, details)
+    else
+        setHeight(dropdownList, options)
+    end
+    if moveBelow then moveBelow() end
+end
+
+-- Patch button events to use new openDropdown
+gearDropdownBtn.MouseButton1Click:Connect(function()
+    openDropdown(gearDropdownList, gearOptions, selectedGear, setDropdownHeight, function()
+        autoBuyGearToggle.Position = UDim2.new(0, 20, 0, gearDropdownList.Position.Y.Offset + gearDropdownList.Size.Y.Offset + 6)
+        eggHeader.Position = UDim2.new(0, 20, 0, autoBuyGearToggle.Position.Y.Offset + autoBuyGearToggle.Size.Y.Offset + 12)
+        eggDropdownBtn.Position = UDim2.new(0, 20, 0, eggHeader.Position.Y.Offset + eggHeader.Size.Y.Offset + 6)
+        eggDropdownList.Position = UDim2.new(0, 20, 0, eggDropdownBtn.Position.Y.Offset + eggDropdownBtn.Size.Y.Offset + 6)
+        autoBuyEggToggle.Position = UDim2.new(0, 20, 0, eggDropdownList.Position.Y.Offset + eggDropdownList.Size.Y.Offset + 6)
+        seedHeader.Position = UDim2.new(0, 20, 0, autoBuyEggToggle.Position.Y.Offset + autoBuyEggToggle.Size.Y.Offset + 12)
+        seedDropdownBtn.Position = UDim2.new(0, 20, 0, seedHeader.Position.Y.Offset + seedHeader.Size.Y.Offset + 6)
+        seedDropdownList.Position = UDim2.new(0, 20, 0, seedDropdownBtn.Position.Y.Offset + seedDropdownBtn.Size.Y.Offset + 6)
+        autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    end, gearDetails)
+end)
+
+seedDropdownBtn.MouseButton1Click:Connect(function()
+    openDropdown(seedDropdownList, seedOptions, selectedSeeds, setDropdownHeight, function()
+        autoBuySeedToggle.Position = UDim2.new(0, 20, 0, seedDropdownList.Position.Y.Offset + seedDropdownList.Size.Y.Offset + 6)
+    end, seedDetails)
 end)
